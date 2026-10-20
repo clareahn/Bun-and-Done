@@ -32,11 +32,11 @@ struct TaskListView: View {
             if taskStore.dueSoonTasks.isEmpty == false {
                 Section("Due soon") {
                     ForEach(taskStore.dueSoonTasks) { task in
-                        TaskRowView(task: task) { taskStore.toggleCompleted(task) }
+                        taskLink(task)
                             .listRowBackground(Color.cardBackground)
                     }
                     .onDelete { offsets in
-                        taskStore.deleteTasks(at: offsets, from: taskStore.dueSoonTasks)
+                        taskStore.deleteTasksFromList(at: offsets, from: taskStore.dueSoonTasks)
                     }
                 }
             }
@@ -44,11 +44,11 @@ struct TaskListView: View {
             if taskStore.noDueDateTasks.isEmpty == false {
                 Section("No due date") {
                     ForEach(taskStore.noDueDateTasks) { task in
-                        TaskRowView(task: task) { taskStore.toggleCompleted(task) }
+                        taskLink(task)
                             .listRowBackground(Color.cardBackground)
                     }
                     .onDelete { offsets in
-                        taskStore.deleteTasks(at: offsets, from: taskStore.noDueDateTasks)
+                        taskStore.deleteTasksFromList(at: offsets, from: taskStore.noDueDateTasks)
                     }
                 }
             }
@@ -57,11 +57,11 @@ struct TaskListView: View {
                 Section {
                     if isShowingCompleted {
                         ForEach(taskStore.completedTasks) { task in
-                            TaskRowView(task: task) { taskStore.toggleCompleted(task) }
+                            taskLink(task)
                                 .listRowBackground(Color.cardBackground)
                         }
                         .onDelete { offsets in
-                            taskStore.deleteTasks(at: offsets, from: taskStore.completedTasks)
+                            taskStore.deleteTasksFromList(at: offsets, from: taskStore.completedTasks)
                         }
                     }
                 } header: {
@@ -83,6 +83,16 @@ struct TaskListView: View {
         }
     }
         
+    // Details screen
+    private func taskLink(_ task: TaskItem) -> some View {
+        NavigationLink {
+            TaskDetailView(task:task)
+        } label: {
+            TaskRowView(task: task) {
+                taskStore.toggleCompleted(task)
+            }
+        }
+    }
     private var addButton: some View {
         Button {
             isShowingAddTask = true
@@ -93,6 +103,8 @@ struct TaskListView: View {
                 .background(Color.chipBackground, in: Circle())
                 .foregroundStyle(Color.accentColor)
         }
+        .padding()
+                .accessibilityLabel("Add task")
     }
 
     private var headerSection: some View {

@@ -92,13 +92,19 @@ final class TaskStore: ObservableObject {
         saveAndRefresh()
     }
 
-    func deleteTasks(at offsets: IndexSet, from displayedTasks: [TaskItem]) {
+    
+    func deleteTasksFromList(at offsets: IndexSet, from displayedTasks: [TaskItem]) {
         let tasksToDelete = offsets.map { displayedTasks[$0] }
 
         for task in tasksToDelete {
             modelContext.delete(task)
         }
 
+        saveAndRefresh()
+    }
+    
+    func deleteTask(_ task: TaskItem) {
+        modelContext.delete(task)
         saveAndRefresh()
     }
 
