@@ -39,12 +39,11 @@ struct TaskRowView: View {
                     }
                 }
 
-                if dynamicTypeSize.isAccessibilitySize {
-                    VStack(alignment: .leading, spacing: 4) {
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 6) {
                         tagsAndPriority
                     }
-                } else {
-                    HStack(spacing: 6) {
+                    VStack(alignment: .leading, spacing: 4) {
                         tagsAndPriority
                     }
                 }
@@ -84,9 +83,13 @@ struct TaskRowView: View {
                 .background(Color.chipBackground, in: RoundedRectangle(cornerRadius: 4))
         }
 
-        Label(task.priority.title, systemImage: "flag.fill")
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(task.priority == .high ? Color.accentColor : Color.secondaryText)
-            .accessibilityLabel("\(task.priority.title) priority")
+        HStack(spacing: 4) {
+            Image(systemName: "flag.fill")
+            Text(task.priority.title)
+        }
+        .font(.caption.weight(.semibold))
+        .foregroundStyle(task.priority == .high ? Color.accentColor : Color.secondaryText)
+        .accessibilityLabel("\(task.priority.title) priority")
+        .fixedSize()
     }
 }

@@ -31,7 +31,14 @@ struct TaskDetailView: View {
                     .font(.title.bold())
                     .foregroundStyle(Color.primaryText)
 
-                tagsAndPriority
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 6) {
+                        tagsAndPriority
+                    }
+                    VStack(alignment: .leading, spacing: 4) {
+                        tagsAndPriority
+                    }
+                }
 
                 // Cards sit side by side, but stack at accessibility text sizes
                 if dynamicTypeSize.isAccessibilitySize {
@@ -79,24 +86,26 @@ struct TaskDetailView: View {
         }
     }
 
-    // MARK: - Pieces of the screen
-
+    // Pieces of the screen
+    @ViewBuilder
     private var tagsAndPriority: some View {
-        HStack(spacing: 6) {
-            ForEach(task.tags, id: \.self) { tag in
-                Text(tag)
-                    .font(.caption)
-                    .foregroundStyle(Color.secondaryText)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.chipBackground, in: RoundedRectangle(cornerRadius: 4))
-            }
-
-            Label(task.priority.title, systemImage: "flag.fill")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(task.priority == .high ? Color.accentColor : Color.secondaryText)
-                .accessibilityLabel("\(task.priority.title) priority")
+        ForEach(task.tags, id: \.self) { tag in
+            Text(tag)
+                .font(.caption)
+                .foregroundStyle(Color.secondaryText)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(Color.chipBackground, in: RoundedRectangle(cornerRadius: 4))
         }
+        
+        HStack(spacing: 4) {
+            Image(systemName: "flag.fill")
+            Text(task.priority.title)
+        }
+        .font(.caption.weight(.semibold))
+        .foregroundStyle(task.priority == .high ? Color.accentColor : Color.secondaryText)
+        .accessibilityLabel("\(task.priority.title) priority")
+        .fixedSize()
     }
 
     private var dueCard: some View {
@@ -136,7 +145,7 @@ struct TaskDetailView: View {
         .background(Color.cardBackground, in: RoundedRectangle(cornerRadius: 12))
     }
 
-    // MARK: - Actions
+    // Actions
 
     private func deleteTask() {
         taskStore.deleteTask(task)
