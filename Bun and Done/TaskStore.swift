@@ -11,10 +11,17 @@ import Combine
 
 @MainActor
 final class TaskStore: ObservableObject {
+    enum TaskCreationResult {
+         case success
+         case missingTitle
+         case duplicateTitle
+     }
+    
     @Published private(set) var allTasks: [TaskItem] = []
     @Published var selectedTag = "All"
 
     let filterTags = ["All", "Study", "Work", "Chores"]
+    private let defaultTags = ["Study", "University", "Work", "Chores", "Personal"]
 
     private let modelContext: ModelContext
 
@@ -48,8 +55,37 @@ final class TaskStore: ObservableObject {
     var openCount: Int {
         allTasks.filter { $0.isCompleted == false }.count
     }
-
-    // Completing and deleting
+    
+    // Default tags, plus any custom tags
+    var allTags: [String] {
+        var tags = defaultTags
+        for task in allTasks {
+            for tag in task.tags where tags.contains(tag) == false {
+                tags.append(tag)
+            }
+        }
+        return tags
+    }
+    
+    // Adding, completing and deleting
+    func addTask(title: String, tags: [String], priority: Priority, dueDate: Date?) -> TaskCreationResult {
+        let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+ 
+        guard trimmedTitle.isEmpty == false else {
+            return .missingTitle
+        }
+ 
+        guard allTasks.contains(where: {
+            $0.isCompleted == false &&
+            $0.title.localizedCaseInsensitiveCompare(trimmedTitle) == .orderedSame
+        }) == false else {
+            return .duplicateTitle
+        }
+ 
+        modelContext.insert(TaskItem(title: trimmedTitle, tags: tags, priority: priority, dueDate: dueDate))
+        saveAndRefresh()
+        return .success
+    }
 
     func toggleCompleted(_ task: TaskItem) {
         task.isCompleted.toggle()

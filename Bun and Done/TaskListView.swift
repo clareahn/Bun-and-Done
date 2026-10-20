@@ -10,6 +10,7 @@ struct TaskListView: View {
     @EnvironmentObject private var taskStore: TaskStore
 
     @State private var isShowingCompleted = false
+    @State private var isShowingAddTask = false
 
     var body: some View {
         List {
@@ -22,7 +23,7 @@ struct TaskListView: View {
 
             if taskStore.dueSoonTasks.isEmpty && taskStore.noDueDateTasks.isEmpty {
                 Section {
-                    Text("No open tasks here.")
+                    Text("No open tasks here.Tap + to add one")
                         .foregroundStyle(Color.secondaryText)
                         .listRowBackground(Color.cardBackground)
                 }
@@ -71,6 +72,27 @@ struct TaskListView: View {
         .scrollContentBackground(.hidden)
         .background(Color.appBackground)
         .navigationTitle("Tasks")
+        .overlay(alignment: .bottomTrailing) {
+            addButton
+        }
+        .sheet(isPresented: $isShowingAddTask) {
+            NavigationStack {
+                AddTaskView()
+            }
+            .environmentObject(taskStore)
+        }
+    }
+        
+    private var addButton: some View {
+        Button {
+            isShowingAddTask = true
+        } label: {
+            Image(systemName: "plus")
+                .font(.title2.weight(.semibold))
+                .padding(18)
+                .background(Color.chipBackground, in: Circle())
+                .foregroundStyle(Color.accentColor)
+        }
     }
 
     private var headerSection: some View {
