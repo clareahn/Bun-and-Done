@@ -15,7 +15,7 @@ struct Bun_and_DoneApp: App {
  
     init() {
         do {
-            let container = try ModelContainer(for: TaskItem.self)
+            let container = try ModelContainer(for: TaskItem.self, AppSettings.self)
             modelContainer = container
             _taskStore = StateObject(
                 wrappedValue: TaskStore(modelContext: container.mainContext)
@@ -27,10 +27,8 @@ struct Bun_and_DoneApp: App {
  
     var body: some Scene {
         WindowGroup {
-            NavigationStack {
-                TaskListView()
-            }
-            .environmentObject(taskStore)
+            MainTabView()
+                .environmentObject(taskStore)
         }
         .modelContainer(modelContainer)
     }

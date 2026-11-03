@@ -28,7 +28,12 @@ final class TaskStore: ObservableObject {
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
         loadDefaultTasks()
+        _ = fetchOrCreateSettings()
         saveAndRefresh()
+    }
+    
+    var settings: AppSettings {
+        fetchOrCreateSettings()
     }
 
     // Lists used by the task screen
@@ -107,6 +112,17 @@ final class TaskStore: ObservableObject {
         modelContext.delete(task)
         saveAndRefresh()
     }
+    
+    func updateSettings(focusLength: Int, breakLength: Int, notifySessionEnds: Bool,
+                            deadlineReminders: Bool, reminderDaysBefore: Int) {
+            let settings = fetchOrCreateSettings()
+            settings.focusLength = focusLength
+            settings.breakLength = breakLength
+            settings.notifySessionEnds = notifySessionEnds
+            settings.deadlineReminders = deadlineReminders
+            settings.reminderDaysBefore = reminderDaysBefore
+            saveAndRefresh()
+        }
 
     // Database helpers
 
@@ -152,6 +168,23 @@ final class TaskStore: ObservableObject {
             print("Failed to save task changes: \(error)")
         }
     }
+    
+    private func fetchOrCreateSettings() -> AppSettings {
+            var descriptor = FetchDescriptor<AppSettings>()
+            descriptor.fetchLimit = 1
+     
+            do {
+                if let existingSettings = try modelContext.fetch(descriptor).first {
+                    return existingSettings
+                }
+            } catch {
+                print("Failed to fetch settings: \(error)")
+            }
+     
+            let newSettings = AppSettings()
+            modelContext.insert(newSettings)
+            return newSettings
+        }
 }
 
 // Preview helper
@@ -159,7 +192,7 @@ final class TaskStore: ObservableObject {
 extension TaskStore {
     static let previewContainer: ModelContainer = {
         let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
-        return try! ModelContainer(for: TaskItem.self, configurations: configuration)
+        return try! ModelContainer(for: TaskItem.self, AppSettings.self, configurations: configuration)
     }()
 
     static var preview: TaskStore {
