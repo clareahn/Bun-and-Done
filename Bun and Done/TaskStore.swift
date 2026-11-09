@@ -72,6 +72,10 @@ final class TaskStore: ObservableObject {
         return tags
     }
     
+    var openTasks: [TaskItem] {
+        allTasks.filter { $0.isCompleted == false }
+    }
+    
     // Adding, completing and deleting
     func addTask(title: String, tags: [String], priority: Priority, dueDate: Date?) -> TaskCreationResult {
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
