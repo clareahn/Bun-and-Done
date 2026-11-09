@@ -10,7 +10,7 @@ import Combine
 
 @MainActor
 final class FocusTimer: ObservableObject {
-    enum Phase { case idle, focusing, onBreak }
+    enum Phase { case idle, focusing, breakReady, onBreak }
 
     @Published private(set) var phase: Phase = .idle
     @Published private(set) var secondsRemaining = 0
@@ -40,8 +40,7 @@ final class FocusTimer: ObservableObject {
     }
 
     func pause() {
-        guard phase != .idle, isPaused == false else { return }
-        isPaused = true
+        guard phase == .focusing || phase == .onBreak, isPaused == false else { return }
         endDate = nil
         ticker = nil
     }
@@ -60,6 +59,11 @@ final class FocusTimer: ObservableObject {
         phase = .idle
         secondsRemaining = 0
         totalSeconds = 0
+    }
+    
+    func startBreak() {
+        guard phase == .breakReady else { return }
+        begin(.onBreak, minutes: breakMinutes)
     }
 
     private func begin(_ newPhase: Phase, minutes: Int) {
@@ -86,11 +90,13 @@ final class FocusTimer: ObservableObject {
     private func finishPhase() {
         switch phase {
         case .focusing:
+            ticker = nil
+            endDate = nil
+            phase = .breakReady
             onFocusCompleted?(focusMinutes)
-            begin(.onBreak, minutes: breakMinutes)
         case .onBreak:
             reset()
-        case .idle:
+        case .idle, .breakReady:
             break
         }
     }

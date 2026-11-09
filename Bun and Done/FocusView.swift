@@ -31,6 +31,17 @@ struct FocusView: View {
 
                 if focusTimer.phase == .idle {
                     setupControls
+                } else if focusTimer.phase == .breakReady {
+                    Button {
+                        focusTimer.startBreak()
+                    } label: {
+                        Label("Start break", systemImage: "cup.and.saucer")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.successGreen, in: RoundedRectangle(cornerRadius: 12))
+                            .foregroundStyle(Color.appBackground)
+                    }
                 } else {
                     runningControls
                 }
