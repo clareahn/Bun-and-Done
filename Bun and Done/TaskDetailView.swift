@@ -45,12 +45,12 @@ struct TaskDetailView: View {
                 if dynamicTypeSize.isAccessibilitySize {
                     VStack(spacing: 12) {
                         dueCard
-                        createdCard
+                        focusTimeCard
                     }
                 } else {
                     HStack(alignment: .top, spacing: 12) {
                         dueCard
-                        createdCard
+                        focusTimeCard
                     }
                 }
 
@@ -65,6 +65,8 @@ struct TaskDetailView: View {
                         .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 12))
                         .foregroundStyle(Color.appBackground)
                 }
+                
+                focusHistory
 
                 Button(role: .destructive) {
                     isShowingDeleteAlert = true
@@ -130,11 +132,11 @@ struct TaskDetailView: View {
         .accessibilityElement(children: .combine)
     }
 
-    private var createdCard: some View {
+    private var focusTimeCard: some View {
         infoCard(
-            heading: "Added",
-            value: task.createdAt.formatted(.dateTime.day().month()),
-            detail: task.createdAt.formatted(.dateTime.weekday(.wide)),
+            heading: "Time focused",
+            value: task.focusTimeLabel,
+            detail: "\(task.focusSessions.count) carrots grown",
             valueColour: Color.primaryText
         )
         .accessibilityElement(children: .combine)
@@ -154,6 +156,33 @@ struct TaskDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
+        .background(Color.cardBackground, in: RoundedRectangle(cornerRadius: 12))
+    }
+    
+    private var focusHistory: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Focus history")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Color.secondaryText)
+                .textCase(.uppercase)
+
+            if task.focusSessions.isEmpty {
+                Text("No focus sessions yet.")
+                    .foregroundStyle(Color.secondaryText)
+            } else {
+                ForEach(task.focusSessions.sorted { $0.completedAt > $1.completedAt }) { session in
+                    HStack {
+                        Text(session.completedAt.formatted(date: .abbreviated, time: .shortened))
+                        Spacer()
+                        Text("\(session.durationMinutes) min")
+                            .foregroundStyle(Color.secondaryText)
+                    }
+                    .font(.subheadline)
+                }
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.cardBackground, in: RoundedRectangle(cornerRadius: 12))
     }
 

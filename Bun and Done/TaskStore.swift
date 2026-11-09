@@ -151,6 +151,13 @@ final class TaskStore: ObservableObject {
         saveAndRefresh()
         return .success
     }
+    
+    func addFocusSession(minutes: Int, task: TaskItem?) {
+        let session = FocusSession(durationMinutes: minutes)
+        modelContext.insert(session)
+        session.task = task   // set the link after inserting
+        saveAndRefresh()
+    }
 
     // Database helpers
 
@@ -220,7 +227,7 @@ final class TaskStore: ObservableObject {
 extension TaskStore {
     static let previewContainer: ModelContainer = {
         let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
-        return try! ModelContainer(for: TaskItem.self, AppSettings.self, configurations: configuration)
+        return try! ModelContainer(for: TaskItem.self, AppSettings.self, FocusSession.self, configurations: configuration)
     }()
 
     static var preview: TaskStore {

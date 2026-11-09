@@ -59,6 +59,12 @@ struct FocusView: View {
             focusLength = taskStore.settings.focusLength
             breakLength = taskStore.settings.breakLength
         }
+        .onChange(of: focusTimer.phase) { _, newPhase in
+            if newPhase == .breakReady {
+                let task = selectedTask?.modelContext != nil ? selectedTask : nil
+                taskStore.addFocusSession(minutes: focusLength, task: task)
+            }
+        }
     }
 
     private var setupControls: some View {

@@ -23,6 +23,7 @@ enum Priority: String, CaseIterable, Identifiable, Codable {
 @Model
 final class TaskItem {
     @Attribute(.unique) var id: UUID
+    @Relationship(inverse: \FocusSession.task) var focusSessions: [FocusSession] = []
     var title: String
     var tags: [String]
     var priority: Priority
@@ -66,5 +67,16 @@ final class TaskItem {
         if daysLeft < 0 { return "Overdue" }
         if daysLeft == 0 { return "Due today" }
         return "Due in \(daysLeft) days"
+    }
+    
+    var totalFocusMinutes: Int {
+        focusSessions.reduce(0) { $0 + $1.durationMinutes }
+    }
+
+    var focusTimeLabel: String {
+        let hours = totalFocusMinutes / 60
+        let minutes = totalFocusMinutes % 60
+        if hours == 0 { return "\(minutes)m" }
+        return minutes == 0 ? "\(hours)h" : "\(hours)h \(minutes)m"
     }
 }
