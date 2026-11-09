@@ -127,6 +127,30 @@ final class TaskStore: ObservableObject {
             settings.reminderDaysBefore = reminderDaysBefore
             saveAndRefresh()
         }
+    
+    func updateTask(_ task: TaskItem, title: String, tags: [String], priority: Priority, dueDate: Date?) -> TaskCreationResult {
+        let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard trimmedTitle.isEmpty == false else {
+            return .missingTitle
+        }
+
+        // Same duplicate check as addTask, but ignore the task being edited
+        guard allTasks.contains(where: {
+            $0.id != task.id && // it's a different task from the one being edited
+            $0.isCompleted == false && // and it's still open
+            $0.title.localizedCaseInsensitiveCompare(trimmedTitle) == .orderedSame // and it has the same title
+        }) == false else {
+            return .duplicateTitle
+        }
+
+        task.title = trimmedTitle
+        task.tags = tags
+        task.priority = priority
+        task.dueDate = dueDate
+        saveAndRefresh()
+        return .success
+    }
 
     // Database helpers
 

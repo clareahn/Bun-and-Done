@@ -25,6 +25,8 @@ struct AddTaskView: View {
     @State private var alertMessage = ""
     @State private var isShowingAlert = false
 
+    var taskToEdit: TaskItem? = nil
+    
     // Default tags plus any new ones made on this screen
     private var tagOptions: [String] {
         taskStore.allTags + extraTags
@@ -81,7 +83,7 @@ struct AddTaskView: View {
                     .tint(Color.successGreen)
 
                 if hasDueDate {
-                    DatePicker("Date", selection: $dueDate, in: Date()..., displayedComponents: .date)
+                    DatePicker("Date", selection: $dueDate, in: min(dueDate, Date())..., displayedComponents: .date)
                 }
             } header: {
                 Text("Deadline")
@@ -94,14 +96,14 @@ struct AddTaskView: View {
         }
         .scrollContentBackground(.hidden)
         .background(Color.appBackground)
-        .navigationTitle("New Task")
+        .navigationTitle(taskToEdit == nil ? "New Task" : "Edit Task")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") { dismiss() }
             }
             ToolbarItem(placement: .confirmationAction) {
-                Button("Add") { createTask() }
+                Button(taskToEdit == nil ? "Add" : "Save") { createTask() }
             }
         }
         .alert(alertTitle, isPresented: $isShowingAlert) {
@@ -109,6 +111,7 @@ struct AddTaskView: View {
         } message: {
             Text(alertMessage)
         }
+        .onAppear(perform: loadTaskToEdit)
     }
 
     // Helper functions
@@ -146,12 +149,12 @@ struct AddTaskView: View {
     }
 
     private func createTask() {
-        let result = taskStore.addTask(
-            title: title,
-            tags: selectedTags,
-            priority: priority,
-            dueDate: hasDueDate ? dueDate : nil
-        )
+        let result: TaskStore.TaskCreationResult
+        if let task = taskToEdit {
+            result = taskStore.updateTask(task, title: title, tags: selectedTags, priority: priority, dueDate: hasDueDate ? dueDate : nil)
+        } else {
+            result = taskStore.addTask(title: title, tags: selectedTags,priority: priority, dueDate: hasDueDate ? dueDate : nil)
+        }
 
         switch result {
         case .success:
@@ -167,6 +170,17 @@ struct AddTaskView: View {
         alertTitle = title
         alertMessage = message
         isShowingAlert = true
+    }
+    
+    private func loadTaskToEdit() {
+        guard let task = taskToEdit else { return }
+        title = task.title
+        priority = task.priority
+        selectedTags = task.tags
+        hasDueDate = task.dueDate != nil
+        if let existingDate = task.dueDate {
+            dueDate = existingDate
+        }
     }
 }
 

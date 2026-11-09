@@ -16,6 +16,7 @@ struct TaskDetailView: View {
     let task: TaskItem
 
     @State private var isShowingDeleteAlert = false
+    @State private var isShowingEdit = false
 
     var body: some View {
         // After a delete the task has no modelContext, so stop reading it
@@ -78,6 +79,17 @@ struct TaskDetailView: View {
         .background(Color.appBackground)
         .navigationTitle("Task")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button("Edit") { isShowingEdit = true }
+            }
+        }
+        .sheet(isPresented: $isShowingEdit) {
+            NavigationStack {
+                AddTaskView(taskToEdit: task)
+            }
+            .environmentObject(taskStore)
+        }
         .alert("Delete this task?", isPresented: $isShowingDeleteAlert) {
             Button("Delete", role: .destructive) { deleteTask() }
             Button("Cancel", role: .cancel) { }
