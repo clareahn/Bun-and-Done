@@ -16,9 +16,7 @@ struct MainTabView: View {
             .tabItem { Label("Tasks", systemImage: "checklist") }
 
             NavigationStack {
-                ContentUnavailableView("Focus", systemImage: "timer",
-                                       description: Text("Focus sessions are coming soon."))
-                    .navigationTitle("Focus")
+                FocusView()
             }
             .tabItem { Label("Focus", systemImage: "timer") }
 

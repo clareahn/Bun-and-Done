@@ -12,6 +12,7 @@ import SwiftUI
 struct Bun_and_DoneApp: App {
     private let modelContainer: ModelContainer
     @StateObject private var taskStore: TaskStore
+    @StateObject private var focusTimer = FocusTimer()
  
     init() {
         do {
@@ -29,6 +30,7 @@ struct Bun_and_DoneApp: App {
         WindowGroup {
             MainTabView()
                 .environmentObject(taskStore)
+                .environmentObject(focusTimer)
         }
         .modelContainer(modelContainer)
     }
