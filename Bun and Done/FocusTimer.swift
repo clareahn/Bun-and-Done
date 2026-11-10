@@ -41,6 +41,7 @@ final class FocusTimer: ObservableObject {
 
     func pause() {
         guard phase == .focusing || phase == .onBreak, isPaused == false else { return }
+        isPaused = true
         endDate = nil
         ticker = nil
     }
