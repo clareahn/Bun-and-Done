@@ -21,7 +21,6 @@ final class TaskStore: ObservableObject {
     @Published private(set) var allSessions: [FocusSession] = []
     @Published var selectedTag = "All"
 
-    let filterTags = ["All", "Study", "Work", "Chores"]
     private let defaultTags = ["Study", "University", "Work", "Chores", "Personal"]
 
     private let modelContext: ModelContext
@@ -75,6 +74,10 @@ final class TaskStore: ObservableObject {
     
     var openTasks: [TaskItem] {
         allTasks.filter { $0.isCompleted == false }
+    }
+    
+    var filterTags: [String] {
+        ["All"] + allTags
     }
     
     // Adding, completing and deleting
