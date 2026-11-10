@@ -19,8 +19,8 @@ final class TaskStore: ObservableObject {
     
     @Published private(set) var allTasks: [TaskItem] = []
     @Published private(set) var allSessions: [FocusSession] = []
-    @Published var selectedTag = "All"
-
+    // nil means all; otherwise only tasks with this priority are shown
+    @Published var selectedPriority: Priority? = nil
     private let defaultTags = ["Study", "University", "Work", "Chores", "Personal"]
 
     private let modelContext: ModelContext
@@ -39,8 +39,8 @@ final class TaskStore: ObservableObject {
     // Lists used by the task screen
 
     private var filteredTasks: [TaskItem] {
-        guard selectedTag != "All" else { return allTasks }
-        return allTasks.filter { $0.tags.contains(selectedTag) }
+        guard let selectedPriority else { return allTasks }
+        return allTasks.filter { $0.priority == selectedPriority }
     }
 
     var dueSoonTasks: [TaskItem] {
@@ -74,10 +74,6 @@ final class TaskStore: ObservableObject {
     
     var openTasks: [TaskItem] {
         allTasks.filter { $0.isCompleted == false }
-    }
-    
-    var filterTags: [String] {
-        ["All"] + allTags
     }
     
     // Adding, completing and deleting

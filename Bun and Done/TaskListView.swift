@@ -1,5 +1,5 @@
 //
-//  TaskView.swift
+//  TaskListView.swift
 //  Bun and Done
 //
 //  Created by Clare Ahn on 15/10/2026.
@@ -115,19 +115,19 @@ struct TaskListView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    ForEach(taskStore.filterTags, id: \.self) { tag in
-                        filterButton(tag)
+                    filterButton(title: "All", priority: nil)
+                    ForEach(Priority.allCases) { priority in filterButton(title: priority.title, priority: priority)
                     }
                 }
             }
         }
     }
 
-    private func filterButton(_ tag: String) -> some View {
-        let isSelected = taskStore.selectedTag == tag
+    private func filterButton(title: String, priority: Priority?) -> some View {
+        let isSelected = taskStore.selectedPriority == priority
 
-        return Button(tag) {
-            taskStore.selectedTag = tag
+        return Button(title) {
+            taskStore.selectedPriority = priority
         }
         .buttonStyle(.plain)
         .font(.subheadline.weight(.medium))
