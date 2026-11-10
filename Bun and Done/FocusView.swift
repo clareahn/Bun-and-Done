@@ -49,6 +49,10 @@ struct FocusView: View {
                             .background(Color.successGreen, in: RoundedRectangle(cornerRadius: 12))
                             .foregroundStyle(Color.appBackground)
                     }
+                    Button("Skip break") {
+                        focusTimer.reset()
+                    }
+                    .foregroundStyle(Color.accentColor)
                 } else {
                     currentTaskText
                     runningControls
