@@ -36,11 +36,15 @@ struct MainTabView: View {
 #Preview("Light") {
     MainTabView()
         .environmentObject(TaskStore.preview)
+        .environmentObject(FocusTimer())
+        .environmentObject(SoundPlayer())
 }
 
 #Preview("Dark, large text") {
     MainTabView()
         .environmentObject(TaskStore.preview)
+        .environmentObject(FocusTimer())
+        .environmentObject(SoundPlayer())
         .preferredColorScheme(.dark)
         .environment(\.dynamicTypeSize, .accessibility2)
 }
@@ -48,4 +52,6 @@ struct MainTabView: View {
 #Preview("Landscape", traits: .landscapeLeft) {
     MainTabView()
         .environmentObject(TaskStore.preview)
+        .environmentObject(FocusTimer())
+        .environmentObject(SoundPlayer())
 }

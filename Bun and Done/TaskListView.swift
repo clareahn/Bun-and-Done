@@ -23,7 +23,7 @@ struct TaskListView: View {
 
             if taskStore.dueSoonTasks.isEmpty && taskStore.noDueDateTasks.isEmpty {
                 Section {
-                    Text("No open tasks here.Tap + to add one")
+                    Text("No open tasks here. Tap + to add one")
                         .foregroundStyle(Color.secondaryText)
                         .listRowBackground(Color.cardBackground)
                 }

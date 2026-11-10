@@ -21,7 +21,6 @@ struct SettingsView: View {
 
     private let focusOptions = [15, 25, 45, 60]
     private let breakOptions = [5, 10, 15]
-    private let reminderOptions = [0, 1, 2]
 
     var body: some View {
         Form {
@@ -76,14 +75,6 @@ struct SettingsView: View {
             breakLength: breakLength,
             notifySessionEnds: notifySessionEnds
         )
-    }
-
-    private func reminderText(_ days: Int) -> String {
-        switch days {
-        case 0: return "On the day"
-        case 1: return "1 day before"
-        default: return "\(days) days before"
-        }
     }
 }
 

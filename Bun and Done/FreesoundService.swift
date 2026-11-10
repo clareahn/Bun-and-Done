@@ -40,7 +40,7 @@ enum FreesoundError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .badResponse: return "Couldn't load sounds right now. Please try again later."
-        case .noResults:   return "No sounds found for this option."
+        case .noResults:   return "No sounds found. Please try again later."
         }
     }
 }
