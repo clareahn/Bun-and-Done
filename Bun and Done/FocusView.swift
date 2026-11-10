@@ -18,6 +18,10 @@ struct FocusView: View {
 
     private let focusOptions = [1, 25, 45, 60]
     private let breakOptions = [5, 10, 15]
+    
+    // sound
+    @EnvironmentObject private var soundPlayer: SoundPlayer
+    @State private var isShowingSounds = false
 
     var body: some View {
         ScrollView {
@@ -55,6 +59,26 @@ struct FocusView: View {
         }
         .background(Color.appBackground)
         .navigationTitle("Focus")
+        
+        // sound
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    isShowingSounds = true
+                } label: {
+                    Image(systemName: soundPlayer.isPlaying ? "speaker.wave.2.fill" : "music.note")
+                }
+                .accessibilityLabel("Focus sounds")
+            }
+        }
+        .sheet(isPresented: $isShowingSounds) {
+            NavigationStack {
+                SoundPlayerView()
+            }
+            .environmentObject(soundPlayer)
+            .presentationDetents([.medium, .large])
+        }
+        
         .onAppear {
             focusLength = taskStore.settings.focusLength
             breakLength = taskStore.settings.breakLength
@@ -63,6 +87,10 @@ struct FocusView: View {
             if newPhase == .breakReady {
                 let task = selectedTask?.modelContext != nil ? selectedTask : nil
                 taskStore.addFocusSession(minutes: focusLength, task: task)
+            }
+            // Stop background sound whenever a focus session finishes or is reset
+            if newPhase != .focusing {
+                soundPlayer.stop()
             }
         }
     }
@@ -139,6 +167,7 @@ struct FocusView: View {
     }
     .environmentObject(TaskStore.preview)
     .environmentObject(FocusTimer())
+    .environmentObject(SoundPlayer())
 
 }
 
@@ -148,6 +177,7 @@ struct FocusView: View {
     }
     .environmentObject(TaskStore.preview)
     .environmentObject(FocusTimer())
+    .environmentObject(SoundPlayer())
     .preferredColorScheme(.dark)
     .environment(\.dynamicTypeSize, .accessibility2)
 }
@@ -158,4 +188,5 @@ struct FocusView: View {
     }
     .environmentObject(TaskStore.preview)
     .environmentObject(FocusTimer())
+    .environmentObject(SoundPlayer())
 }

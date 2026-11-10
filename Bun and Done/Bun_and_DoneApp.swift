@@ -13,6 +13,7 @@ struct Bun_and_DoneApp: App {
     private let modelContainer: ModelContainer
     @StateObject private var taskStore: TaskStore
     @StateObject private var focusTimer = FocusTimer()
+    @StateObject private var soundPlayer = SoundPlayer()
  
     init() {
         do {
@@ -31,6 +32,7 @@ struct Bun_and_DoneApp: App {
             MainTabView()
                 .environmentObject(taskStore)
                 .environmentObject(focusTimer)
+                .environmentObject(soundPlayer)
         }
         .modelContainer(modelContainer)
     }
