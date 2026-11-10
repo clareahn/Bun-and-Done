@@ -18,7 +18,7 @@ final class AppSettings {
     init(
         focusLength: Int = 25,
         breakLength: Int = 5,
-        notifySessionEnds: Bool = true,
+        notifySessionEnds: Bool = false,
     ) {
         self.focusLength = focusLength
         self.breakLength = breakLength

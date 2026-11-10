@@ -53,10 +53,15 @@ struct SettingsView: View {
         .onAppear(perform: loadSettings)
         .onChange(of: focusLength) { saveSettings() }
         .onChange(of: breakLength) { saveSettings() }
-        .onChange(of: notifySessionEnds) { saveSettings() }
+        .onChange(of: notifySessionEnds) { _, isOn in saveSettings()
+            // Only ask for notification permission when the user turns this on
+            if isOn {
+                FocusNotifications.requestPermission()
+            }
+        }
     }
 
-    // MARK: - Helper functions
+    // Helper functions
 
     private func loadSettings() {
         let settings = taskStore.settings

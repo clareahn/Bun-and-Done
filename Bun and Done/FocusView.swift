@@ -84,7 +84,6 @@ struct FocusView: View {
         }
         
         .onAppear {
-            FocusNotifications.requestPermission()
             focusLength = taskStore.settings.focusLength
             breakLength = taskStore.settings.breakLength
         }   
