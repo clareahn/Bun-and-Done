@@ -118,14 +118,11 @@ final class TaskStore: ObservableObject {
         saveAndRefresh()
     }
     
-    func updateSettings(focusLength: Int, breakLength: Int, notifySessionEnds: Bool,
-                            deadlineReminders: Bool, reminderDaysBefore: Int) {
+    func updateSettings(focusLength: Int, breakLength: Int, notifySessionEnds: Bool) {
             let settings = fetchOrCreateSettings()
             settings.focusLength = focusLength
             settings.breakLength = breakLength
             settings.notifySessionEnds = notifySessionEnds
-            settings.deadlineReminders = deadlineReminders
-            settings.reminderDaysBefore = reminderDaysBefore
             saveAndRefresh()
         }
     

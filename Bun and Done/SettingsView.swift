@@ -18,8 +18,6 @@ struct SettingsView: View {
     @State private var focusLength = 25
     @State private var breakLength = 5
     @State private var notifySessionEnds = true
-    @State private var deadlineReminders = true
-    @State private var reminderDaysBefore = 1
 
     private let focusOptions = [15, 25, 45, 60]
     private let breakOptions = [5, 10, 15]
@@ -45,17 +43,6 @@ struct SettingsView: View {
             Section("Notifications") {
                 Toggle("Session ends", isOn: $notifySessionEnds)
                     .tint(Color.successGreen)
-
-                Toggle("Deadline reminders", isOn: $deadlineReminders)
-                    .tint(Color.successGreen)
-
-                if deadlineReminders {
-                    Picker("Remind me", selection: $reminderDaysBefore) {
-                        ForEach(reminderOptions, id: \.self) { days in
-                            Text(reminderText(days)).tag(days)
-                        }
-                    }
-                }
             }
             .listRowBackground(Color.cardBackground)
         }
@@ -67,8 +54,6 @@ struct SettingsView: View {
         .onChange(of: focusLength) { saveSettings() }
         .onChange(of: breakLength) { saveSettings() }
         .onChange(of: notifySessionEnds) { saveSettings() }
-        .onChange(of: deadlineReminders) { saveSettings() }
-        .onChange(of: reminderDaysBefore) { saveSettings() }
     }
 
     // MARK: - Helper functions
@@ -78,17 +63,13 @@ struct SettingsView: View {
         focusLength = settings.focusLength
         breakLength = settings.breakLength
         notifySessionEnds = settings.notifySessionEnds
-        deadlineReminders = settings.deadlineReminders
-        reminderDaysBefore = settings.reminderDaysBefore
     }
 
     private func saveSettings() {
         taskStore.updateSettings(
             focusLength: focusLength,
             breakLength: breakLength,
-            notifySessionEnds: notifySessionEnds,
-            deadlineReminders: deadlineReminders,
-            reminderDaysBefore: reminderDaysBefore
+            notifySessionEnds: notifySessionEnds
         )
     }
 

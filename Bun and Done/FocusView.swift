@@ -84,17 +84,37 @@ struct FocusView: View {
         }
         
         .onAppear {
+            FocusNotifications.requestPermission()
             focusLength = taskStore.settings.focusLength
             breakLength = taskStore.settings.breakLength
-        }
+        }   
         .onChange(of: focusTimer.phase) { _, newPhase in
+            // A focus session reached 00:00, so save it
             if newPhase == .breakReady {
                 let task = selectedTask?.modelContext != nil ? selectedTask : nil
                 taskStore.addFocusSession(minutes: focusLength, task: task)
             }
-            // Stop background sound whenever a focus session finishes or is reset
-            if newPhase != .focusing {
+
+            if newPhase == .focusing {
+                scheduleFocusNotification(in: focusLength * 60)
+            } else {
+                // Stop background sound whenever a focus session finishes or is reset
                 soundPlayer.stop()
+            }
+
+            // Only cancel when the user resets; if focus finished on its own, let the notification fire
+            if newPhase == .idle {
+                FocusNotifications.cancelFocusEnd()
+            }
+        }
+        
+        .onChange(of: focusTimer.isPaused) { _, isPaused in
+            guard focusTimer.phase == .focusing else { return }
+
+            if isPaused {
+                FocusNotifications.cancelFocusEnd()
+            } else {
+                scheduleFocusNotification(in: focusTimer.secondsRemaining)
             }
         }
     }
@@ -162,6 +182,11 @@ struct FocusView: View {
             .font(.title2)
         }
         .foregroundStyle(Color.accentColor)
+    }
+    // Only schedule if notification preference is turned on in Settings
+    private func scheduleFocusNotification(in seconds: Int) {
+        guard taskStore.settings.notifySessionEnds else { return }
+        FocusNotifications.scheduleFocusEnd(in: seconds)
     }
 }
 

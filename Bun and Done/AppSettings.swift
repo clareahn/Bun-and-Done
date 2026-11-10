@@ -14,20 +14,14 @@ final class AppSettings {
     var focusLength: Int
     var breakLength: Int
     var notifySessionEnds: Bool
-    var deadlineReminders: Bool
-    var reminderDaysBefore: Int
 
     init(
         focusLength: Int = 25,
         breakLength: Int = 5,
         notifySessionEnds: Bool = true,
-        deadlineReminders: Bool = true,
-        reminderDaysBefore: Int = 1
     ) {
         self.focusLength = focusLength
         self.breakLength = breakLength
         self.notifySessionEnds = notifySessionEnds
-        self.deadlineReminders = deadlineReminders
-        self.reminderDaysBefore = reminderDaysBefore
     }
 }
