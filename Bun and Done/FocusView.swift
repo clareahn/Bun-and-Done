@@ -86,7 +86,11 @@ struct FocusView: View {
         .onAppear {
             focusLength = taskStore.settings.focusLength
             breakLength = taskStore.settings.breakLength
-        }   
+            clearSelectedTaskIfNeeded()
+        }
+        .onReceive(taskStore.$allTasks) { _ in
+            clearSelectedTaskIfNeeded()
+        }
         .onChange(of: focusTimer.phase) { _, newPhase in
             // A focus session reached 00:00, so save it
             if newPhase == .breakReady {
@@ -187,6 +191,13 @@ struct FocusView: View {
     private func scheduleFocusNotification(in seconds: Int) {
         guard taskStore.settings.notifySessionEnds else { return }
         FocusNotifications.scheduleFocusEnd(in: seconds)
+    }
+    
+    // Reset the dropdown if the selected task was deleted or completed
+    private func clearSelectedTaskIfNeeded() {
+        if let task = selectedTask, task.modelContext == nil || task.isCompleted {
+            selectedTask = nil
+        }
     }
 }
 
