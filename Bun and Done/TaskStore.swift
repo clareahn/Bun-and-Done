@@ -18,6 +18,7 @@ final class TaskStore: ObservableObject {
      }
     
     @Published private(set) var allTasks: [TaskItem] = []
+    @Published private(set) var allSessions: [FocusSession] = []
     @Published var selectedTag = "All"
 
     let filterTags = ["All", "Study", "Work", "Chores"]
@@ -152,8 +153,8 @@ final class TaskStore: ObservableObject {
         return .success
     }
     
-    func addFocusSession(minutes: Int, task: TaskItem?) {
-        let session = FocusSession(durationMinutes: minutes)
+    func addFocusSession(minutes: Int, task: TaskItem?, completedAt: Date = Date()) {
+        let session = FocusSession(completedAt: completedAt, durationMinutes: minutes)
         modelContext.insert(session)
         session.task = task   // set the link after inserting
         saveAndRefresh()
@@ -194,11 +195,24 @@ final class TaskStore: ObservableObject {
             return []
         }
     }
+    
+    private func fetchAllSessions() -> [FocusSession] {
+        let descriptor = FetchDescriptor<FocusSession>(
+            sortBy: [SortDescriptor(\FocusSession.completedAt)]
+        )
+        do {
+            return try modelContext.fetch(descriptor)
+        } catch {
+            print("Failed to fetch focus sessions: \(error)")
+            return []
+        }
+    }
 
     private func saveAndRefresh() {
         do {
             try modelContext.save()
             allTasks = fetchAllTasks()
+            allSessions = fetchAllSessions()
         } catch {
             print("Failed to save task changes: \(error)")
         }
@@ -232,5 +246,18 @@ extension TaskStore {
 
     static var preview: TaskStore {
         TaskStore(modelContext: previewContainer.mainContext)
+    }
+    
+    // Preview store with some focus sessions spread over the past week
+    static var statisticsPreview: TaskStore {
+        let store = TaskStore(modelContext: previewContainer.mainContext)
+
+        for (index, task) in store.openTasks.prefix(3).enumerated() {
+            for daysAgo in 0..<(5 - index) {
+                let date = Calendar.current.date(byAdding: .day, value: -daysAgo, to: Date()) ?? Date()
+                store.addFocusSession(minutes: 25, task: task, completedAt: date)
+            }
+        }
+        return store
     }
 }
