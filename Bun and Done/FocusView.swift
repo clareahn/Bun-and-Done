@@ -170,7 +170,8 @@ struct FocusView: View {
     
     private var runningControls: some View {
         HStack(spacing: 32) {
-            Button("Reset", systemImage: "arrow.counterclockwise") {
+            Button(focusTimer.phase == .onBreak ? "Skip" : "Reset",
+                   systemImage: focusTimer.phase == .onBreak ? "forward.end.fill" : "arrow.counterclockwise") {
                 focusTimer.reset()
             }
 
@@ -178,8 +179,8 @@ struct FocusView: View {
                    systemImage: focusTimer.isPaused ? "play.fill" : "pause.fill") {
                 focusTimer.isPaused ? focusTimer.resume() : focusTimer.pause()
             }
-            .font(.title2)
         }
+        .font(.title2)
         .foregroundStyle(Color.accentColor)
     }
     // Only schedule if notification preference is turned on in Settings
