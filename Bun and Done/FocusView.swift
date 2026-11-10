@@ -16,7 +16,7 @@ struct FocusView: View {
     @State private var breakLength = 5
     @State private var selectedTask: TaskItem?
 
-    private let focusOptions = [1, 25, 45, 60]
+    private let focusOptions = [15, 25, 45, 60]
     private let breakOptions = [5, 10, 15]
     
     // sound
