@@ -30,7 +30,7 @@ struct SettingsView: View {
                         Text("\(minutes) min").tag(minutes)
                     }
                 }
-
+                
                 Picker("Break length", selection: $breakLength) {
                     ForEach(breakOptions, id: \.self) { minutes in
                         Text("\(minutes) min").tag(minutes)
@@ -42,6 +42,13 @@ struct SettingsView: View {
             Section("Notifications") {
                 Toggle("Session ends", isOn: $notifySessionEnds)
                     .tint(Color.successGreen)
+            }
+            
+            //About Page
+            Section {
+                NavigationLink("About Bun & Done") {
+                    AboutPage()
+                }
             }
             .listRowBackground(Color.cardBackground)
         }
