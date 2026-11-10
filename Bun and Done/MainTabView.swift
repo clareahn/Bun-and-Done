@@ -21,9 +21,7 @@ struct MainTabView: View {
             .tabItem { Label("Focus", systemImage: "timer") }
 
             NavigationStack {
-                ContentUnavailableView("Statistics", systemImage: "chart.bar",
-                                       description: Text("Your carrot harvest will appear here."))
-                    .navigationTitle("Statistics")
+                StatisticsView()
             }
             .tabItem { Label("Statistics", systemImage: "chart.bar") }
 
@@ -45,4 +43,9 @@ struct MainTabView: View {
         .environmentObject(TaskStore.preview)
         .preferredColorScheme(.dark)
         .environment(\.dynamicTypeSize, .accessibility2)
+}
+
+#Preview("Landscape", traits: .landscapeLeft) {
+    MainTabView()
+        .environmentObject(TaskStore.preview)
 }

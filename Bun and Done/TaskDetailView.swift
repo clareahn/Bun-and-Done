@@ -211,3 +211,11 @@ struct TaskDetailView: View {
     .preferredColorScheme(.dark)
     .environment(\.dynamicTypeSize, .accessibility2)
 }
+
+#Preview("Landscape", traits: .landscapeLeft) {
+    let store = TaskStore.preview
+    return NavigationStack {
+        TaskDetailView(task: store.allTasks[1])
+    }
+    .environmentObject(store)
+}

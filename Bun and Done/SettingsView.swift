@@ -116,3 +116,10 @@ struct SettingsView: View {
     .preferredColorScheme(.dark)
     .environment(\.dynamicTypeSize, .accessibility2)
 }
+
+#Preview("Landscape", traits: .landscapeLeft) {
+    NavigationStack {
+        SettingsView()
+    }
+    .environmentObject(TaskStore.preview)
+}

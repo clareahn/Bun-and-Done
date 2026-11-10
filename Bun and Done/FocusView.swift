@@ -154,7 +154,7 @@ struct FocusView: View {
 
 #Preview("Landscape", traits: .landscapeLeft) {
     NavigationStack {
-        TaskListView()
+        FocusView()
     }
     .environmentObject(TaskStore.preview)
     .environmentObject(FocusTimer())

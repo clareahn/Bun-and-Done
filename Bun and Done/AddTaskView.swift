@@ -199,3 +199,10 @@ struct AddTaskView: View {
     .preferredColorScheme(.dark)
     .environment(\.dynamicTypeSize, .accessibility2)
 }
+
+#Preview("Landscape", traits: .landscapeLeft) {
+    NavigationStack {
+        AddTaskView()
+    }
+    .environmentObject(TaskStore.preview)
+}
