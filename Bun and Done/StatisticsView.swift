@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-
+// Statistics tab. All the numbers come from Statistics.swift (TaskStore extension); this file only lays them out.
 struct StatisticsView: View {
     @EnvironmentObject private var taskStore: TaskStore
 

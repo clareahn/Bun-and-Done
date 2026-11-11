@@ -5,12 +5,12 @@
 //  Created by Clare Ahn on 15/10/2026.
 //
 import SwiftUI
-
+// Tasks tab: header with filter chips, then Due soon / No due date / Completed (collapsible) sections, floating + button
 struct TaskListView: View {
     @EnvironmentObject private var taskStore: TaskStore
-
-    @State private var isShowingCompleted = false
-    @State private var isShowingAddTask = false
+    // @State = local state for this screen only
+    @State private var isShowingCompleted = false // is the Completed list open?
+    @State private var isShowingAddTask = false // is the New Task pop-up open?
 
     var body: some View {
         List {
@@ -20,7 +20,7 @@ struct TaskListView: View {
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
             }
-
+            // Empty state message when there are no open tasks (for the current filter)
             if taskStore.dueSoonTasks.isEmpty && taskStore.noDueDateTasks.isEmpty {
                 Section {
                     Text("No open tasks here. Tap + to add one")
@@ -28,14 +28,15 @@ struct TaskListView: View {
                         .listRowBackground(Color.cardBackground)
                 }
             }
-
+            
             if taskStore.dueSoonTasks.isEmpty == false {
+                // Each section only appears if it has tasks
                 Section("Due soon") {
                     ForEach(taskStore.dueSoonTasks) { task in
                         taskLink(task)
                             .listRowBackground(Color.cardBackground)
                     }
-                    .onDelete { offsets in
+                    .onDelete { offsets in // turns on swipe-to-delete
                         taskStore.deleteTasksFromList(at: offsets, from: taskStore.dueSoonTasks)
                     }
                 }
@@ -52,7 +53,7 @@ struct TaskListView: View {
                     }
                 }
             }
-
+            // Completed rows are only drawn when the section is expanded
             if taskStore.completedTasks.isEmpty == false {
                 Section {
                     if isShowingCompleted {
@@ -72,9 +73,11 @@ struct TaskListView: View {
         .scrollContentBackground(.hidden)
         .background(Color.appBackground)
         .navigationTitle("Tasks")
+        // floating + button
         .overlay(alignment: .bottomTrailing) {
             addButton
         }
+        // Add Task opens as a sheet with its own NavigationStack
         .sheet(isPresented: $isShowingAddTask) {
             NavigationStack {
                 AddTaskView()
@@ -84,12 +87,13 @@ struct TaskListView: View {
     }
         
     // Details screen
+    // Tapping the row opens TaskDetailView
     private func taskLink(_ task: TaskItem) -> some View {
         NavigationLink {
             TaskDetailView(task:task)
         } label: {
             TaskRowView(task: task) {
-                taskStore.toggleCompleted(task)
+                taskStore.toggleCompleted(task) // block is passed to TaskRowView and runs when its circle button is tapped (marks done)
             }
         }
     }
@@ -106,7 +110,7 @@ struct TaskListView: View {
         .padding()
                 .accessibilityLabel("Add task")
     }
-
+    // Today's date + open task count, then a horizontal row of filter chips
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("\(Date().formatted(.dateTime.weekday(.wide).day().month(.wide))) · \(taskStore.openCount) open")
@@ -122,7 +126,7 @@ struct TaskListView: View {
             }
         }
     }
-
+    // One chip. Tapping it sets selectedPriority in the store, which re-filters the sections
     private func filterButton(title: String, priority: Priority?) -> some View {
         let isSelected = taskStore.selectedPriority == priority
 
@@ -137,7 +141,7 @@ struct TaskListView: View {
         .foregroundStyle(isSelected ? Color.appBackground : Color.primaryText)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
-
+    // Tappable header that expands/collapses the Completed section with an animation
     private var completedHeader: some View {
         Button {
             withAnimation { isShowingCompleted.toggle() }

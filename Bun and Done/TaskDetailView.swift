@@ -7,7 +7,7 @@
 
 import SwiftUI
 import SwiftData
-
+// Full details for one task: tags, due card, focus time card, complete button, focus history, delete
 struct TaskDetailView: View {
     @EnvironmentObject private var taskStore: TaskStore
     @Environment(\.dismiss) private var dismiss
@@ -20,7 +20,8 @@ struct TaskDetailView: View {
 
     var body: some View {
         // After a delete the task has no modelContext, so stop reading it
-        if task.modelContext != nil {
+        if task.modelContext != nil { // SwiftData object can crash. So it shows nothing in that moment.
+
             details
         }
     }
@@ -55,6 +56,7 @@ struct TaskDetailView: View {
                 }
 
                 Button {
+                    // Same toggle as the circle on the list row.
                     taskStore.toggleCompleted(task)
                 } label: {
                     Label(task.isCompleted ? "Mark as not done" : "Mark task complete",
@@ -88,10 +90,12 @@ struct TaskDetailView: View {
         }
         .sheet(isPresented: $isShowingEdit) {
             NavigationStack {
+                // Reuses AddTaskView in edit mode.
                 AddTaskView(taskToEdit: task)
             }
             .environmentObject(taskStore)
         }
+        // Confirmation before deleting, since it can't be undone.
         .alert("Delete this task?", isPresented: $isShowingDeleteAlert) {
             Button("Delete", role: .destructive) { deleteTask() }
             Button("Cancel", role: .cancel) { }
@@ -121,7 +125,7 @@ struct TaskDetailView: View {
         .accessibilityLabel("\(task.priority.title) priority")
         .fixedSize()
     }
-
+    // "Done" for completed tasks, otherwise the D-day label and the date.
     private var dueCard: some View {
         infoCard(
             heading: "Due",
@@ -129,9 +133,10 @@ struct TaskDetailView: View {
             detail: task.dueDate?.formatted(.dateTime.weekday(.abbreviated).day().month()) ?? "No due date",
             valueColour: task.isCompleted ? Color.successGreen : Color.accentColor
         )
+        // .combine makes VoiceOver read the card as one item
         .accessibilityElement(children: .combine)
     }
-
+    // Total time focused on this task, and how many sessions (carrots).
     private var focusTimeCard: some View {
         infoCard(
             heading: "Time focused",
@@ -141,7 +146,7 @@ struct TaskDetailView: View {
         )
         .accessibilityElement(children: .combine)
     }
-
+    // Shared layout for both cards, so they look the same.
     private func infoCard(heading: String, value: String, detail: String, valueColour: Color) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(heading)
@@ -158,7 +163,7 @@ struct TaskDetailView: View {
         .padding()
         .background(Color.cardBackground, in: RoundedRectangle(cornerRadius: 12))
     }
-    
+    // List of this task's sessions, newest first.
     private var focusHistory: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Focus history")
@@ -187,7 +192,7 @@ struct TaskDetailView: View {
     }
 
     // Actions
-
+    // Deletes through the store, then goes back to the list.
     private func deleteTask() {
         taskStore.deleteTask(task)
         dismiss()

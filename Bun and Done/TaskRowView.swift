@@ -15,6 +15,7 @@ struct TaskRowView: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
+            // circle button, marks task as done
             Button(action: onToggle) {
                 Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
                     .font(.title3)
@@ -38,12 +39,12 @@ struct TaskRowView: View {
                         dueBadge
                     }
                 }
-
+                // Tries the horizontal layout first. If it doesn't fit (big text, small screen), uses the vertical one
                 ViewThatFits(in: .horizontal) {
-                    HStack(spacing: 6) {
+                    HStack(spacing: 6) { // option 1
                         tagsAndPriority
                     }
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: 4) { // option 2 if hstack doesnt fit
                         tagsAndPriority
                     }
                 }
@@ -51,14 +52,14 @@ struct TaskRowView: View {
         }
         .padding(.vertical, 4)
     }
-
+    // Completed tasks are greyed out and crossed out
     private var titleText: some View {
         Text(task.title)
             .font(.headline)
             .foregroundStyle(task.isCompleted ? Color.secondaryText : Color.primaryText)
             .strikethrough(task.isCompleted)
     }
-
+    // D-day badge, hidden for completed tasks. @ViewBuilder lets it show nothing
     @ViewBuilder
     private var dueBadge: some View {
         if task.isCompleted == false {
@@ -73,6 +74,7 @@ struct TaskRowView: View {
     }
 
     @ViewBuilder
+    // Tag chips plus the priority flag (high priority is highlighted)
     private var tagsAndPriority: some View {
         ForEach(task.tags, id: \.self) { tag in
             Text(tag)
@@ -90,6 +92,7 @@ struct TaskRowView: View {
         .font(.caption.weight(.semibold))
         .foregroundStyle(task.priority == .high ? Color.accentColor : Color.secondaryText)
         .accessibilityLabel("\(task.priority.title) priority")
+        // fixedSize stops the flag text from being cut off
         .fixedSize()
     }
 }

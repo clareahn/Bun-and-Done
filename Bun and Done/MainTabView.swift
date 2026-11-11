@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-
+// 4 tabs. Each tab has its own NavigationStack, so opening a screen in one tab doesn't affect the others.
 struct MainTabView: View {
     var body: some View {
         TabView {

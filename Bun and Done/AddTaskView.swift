@@ -6,7 +6,8 @@
 //
 
 import SwiftUI
-
+// Used for BOTH adding and editing. taskToEdit == nil means a new task;
+// otherwise the form is pre-filled and Save updates the task
 struct AddTaskView: View {
     @EnvironmentObject private var taskStore: TaskStore
     @Environment(\.dismiss) private var dismiss
@@ -16,15 +17,17 @@ struct AddTaskView: View {
     @State private var priority: Priority = .medium
     @State private var selectedTags: [String] = []
     @State private var newTagText = ""
+    // Custom tags made on this screen before the task is saved
     @State private var extraTags: [String] = []
     @State private var hasDueDate = true
+    // Defaults to one week from today. ?? Date() is a fallback in case the date math fails
     @State private var dueDate = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
 
     // Alert variables
     @State private var alertTitle = ""
     @State private var alertMessage = ""
     @State private var isShowingAlert = false
-
+    // nil = add mode, a task = edit mode.
     var taskToEdit: TaskItem? = nil
     
     // Default tags plus any new ones made on this screen
@@ -48,10 +51,10 @@ struct AddTaskView: View {
                 .pickerStyle(.segmented)
             }
             .listRowBackground(Color.cardBackground)
-
+            // Field to make new tag
             Section("Tags") {
                 ForEach(tagOptions, id: \.self) { tag in
-                    Button {
+                    Button { // makes tag tappable
                         toggleTag(tag)
                     } label: {
                         HStack {
@@ -83,7 +86,9 @@ struct AddTaskView: View {
                     .tint(Color.successGreen)
 
                 if hasDueDate {
+                    // Range starts today, so new tasks can't get a past date
                     DatePicker("Date", selection: $dueDate, in: min(dueDate, Date())..., displayedComponents: .date)
+                    // min(dueDate, Date()) means an already-overdue task's date is still allowed when editing.
                 }
             } header: {
                 Text("Deadline")
@@ -106,6 +111,7 @@ struct AddTaskView: View {
                 Button(taskToEdit == nil ? "Add" : "Save") { createTask() }
             }
         }
+        // One alert reused for every error. displayMessage() sets its title and message.
         .alert(alertTitle, isPresented: $isShowingAlert) {
             Button("OK", role: .cancel) { }
         } message: {
@@ -121,7 +127,7 @@ struct AddTaskView: View {
         let days = Calendar.current.dateComponents([.day], from: today, to: due).day ?? 0
         return days == 0 ? "Today" : "D-\(days)"
     }
-
+    // Select or unselect a tag.
     private func toggleTag(_ tag: String) {
         if let index = selectedTags.firstIndex(of: tag) {
             selectedTags.remove(at: index)
@@ -129,7 +135,7 @@ struct AddTaskView: View {
             selectedTags.append(tag)
         }
     }
-
+    // Checks the new tag isn't empty and isn't already in the list, then adds and selects it
     private func addNewTag() {
         let trimmedTag = newTagText.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -147,7 +153,7 @@ struct AddTaskView: View {
         selectedTags.append(trimmedTag)
         newTagText = ""
     }
-
+    // Add/Save button. Calls updateTask or addTask
     private func createTask() {
         let result: TaskStore.TaskCreationResult
         if let task = taskToEdit {
@@ -165,13 +171,13 @@ struct AddTaskView: View {
             displayMessage(title: "Task already exists", message: "You already have an open task with this title.")
         }
     }
-
+    // Sets the alert's text and shows it.
     private func displayMessage(title: String, message: String) {
         alertTitle = title
         alertMessage = message
         isShowingAlert = true
     }
-    
+    // Copies the task's values into the form. Does nothing in add mode.
     private func loadTaskToEdit() {
         guard let task = taskToEdit else { return }
         title = task.title

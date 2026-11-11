@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-
+// Progress ring with the carrot picture in the middle. Only displays what it's given; no logic of its own
 struct FocusRingView: View {
     let progress: Double   // 0 to 1
     let isBreak: Bool
@@ -31,10 +31,11 @@ struct FocusRingView: View {
                 .clipShape(Circle())
                 .padding(18)
         }
+        // VoiceOver reads the whole ring as one item, with a percentage
         .accessibilityElement()
         .accessibilityLabel(isBreak ? "On break" : "Carrot \(Int(progress * 100)) percent grown")
     }
-
+    // Picks the carrot image from progress: 4 growth stages, a quarter each. Night sky during a break.
     private var carrotImageName: String {
         if isBreak { return "nighttime" }
         

@@ -10,6 +10,7 @@ import Foundation
 import SwiftData
 
 @Model
+// The user's saved preferences. Only one record ever exists
 final class AppSettings {
     var focusLength: Int
     var breakLength: Int

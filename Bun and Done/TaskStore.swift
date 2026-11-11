@@ -16,33 +16,37 @@ final class TaskStore: ObservableObject {
          case missingTitle
          case duplicateTitle
      }
-    
+    // private(set) = views can read them, but only TaskStore can change them.
     @Published private(set) var allTasks: [TaskItem] = []
     @Published private(set) var allSessions: [FocusSession] = []
     // nil means all; otherwise only tasks with this priority are shown
     @Published var selectedPriority: Priority? = nil
+    // Tags always offered on the Add Task screen.
     private let defaultTags = ["Study", "University", "Work", "Chores", "Personal"]
-
+    // The SwiftData context: used to insert, delete, fetch and save.
     private let modelContext: ModelContext
 
+    // On launch: add sample tasks if the database is empty, make sure a settings record exists,
+    // then save and load everything into allTasks / allSessions
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
         loadDefaultTasks()
         _ = fetchOrCreateSettings()
         saveAndRefresh()
     }
-    
+    // Always returns the single settings record (creates it if it's missing).
     var settings: AppSettings {
         fetchOrCreateSettings()
     }
 
     // Lists used by the task screen
-
+    // Priority filter chip
     private var filteredTasks: [TaskItem] {
         guard let selectedPriority else { return allTasks }
         return allTasks.filter { $0.priority == selectedPriority }
     }
-
+    // "Due soon" section: open tasks with a due date, earliest first
+    // ?? .distantFuture is there to unwrap the optional; these tasks always have a date.
     var dueSoonTasks: [TaskItem] {
         filteredTasks
             .filter { $0.isCompleted == false && $0.dueDate != nil }
@@ -56,7 +60,7 @@ final class TaskStore: ObservableObject {
     var completedTasks: [TaskItem] {
         filteredTasks.filter { $0.isCompleted }
     }
-
+    // Open count for header. e.g. 4 open
     var openCount: Int {
         allTasks.filter { $0.isCompleted == false }.count
     }
@@ -71,37 +75,41 @@ final class TaskStore: ObservableObject {
         }
         return tags
     }
-    
+    // Used by the Focus screen's "Working on" picker and the previews
     var openTasks: [TaskItem] {
         allTasks.filter { $0.isCompleted == false }
     }
     
     // Adding, completing and deleting
     func addTask(title: String, tags: [String], priority: Priority, dueDate: Date?) -> TaskCreationResult {
+        // Trim spaces
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
- 
+        // Reject empty title
         guard trimmedTitle.isEmpty == false else {
             return .missingTitle
         }
- 
+        // Reject title matching an open task, ignores cases
         guard allTasks.contains(where: {
             $0.isCompleted == false &&
             $0.title.localizedCaseInsensitiveCompare(trimmedTitle) == .orderedSame
         }) == false else {
             return .duplicateTitle
         }
- 
+        // insert only stages the new task. saveAndRefresh() writes it to disk.
         modelContext.insert(TaskItem(title: trimmedTitle, tags: tags, priority: priority, dueDate: dueDate))
         saveAndRefresh()
+        // Returns TaskCreationResult so AddTaskView shows correct alert
         return .success
     }
-
+    // Toggle done / Not done. SwiftData notices changes and saves
     func toggleCompleted(_ task: TaskItem) {
         task.isCompleted.toggle()
         saveAndRefresh()
     }
 
-    
+    // Swipe to delete: called when the user swipes a row to delete it.
+    // Swift tells us which row number was swiped (e.g. row 1), not which task.
+    // Row numbers start again from 0 in every section
     func deleteTasksFromList(at offsets: IndexSet, from displayedTasks: [TaskItem]) {
         let tasksToDelete = offsets.map { displayedTasks[$0] }
 
@@ -111,12 +119,13 @@ final class TaskStore: ObservableObject {
 
         saveAndRefresh()
     }
-    
+    // Delete task in the task detail screen
+    // "Delete task" button function
     func deleteTask(_ task: TaskItem) {
         modelContext.delete(task)
         saveAndRefresh()
     }
-    
+    // Called by SettingsView whenever a setting changes. Updates the single settings record and saves.
     func updateSettings(focusLength: Int, breakLength: Int, notifySessionEnds: Bool) {
             let settings = fetchOrCreateSettings()
             settings.focusLength = focusLength
@@ -124,7 +133,7 @@ final class TaskStore: ObservableObject {
             settings.notifySessionEnds = notifySessionEnds
             saveAndRefresh()
         }
-    
+    // Same validation as addTask, then overwrites the task's fields with the new values.
     func updateTask(_ task: TaskItem, title: String, tags: [String], priority: Priority, dueDate: Date?) -> TaskCreationResult {
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -148,7 +157,7 @@ final class TaskStore: ObservableObject {
         saveAndRefresh()
         return .success
     }
-    
+    // Called when a focus session reaches 00:00. Creates a session record, links it to the chosen task
     func addFocusSession(minutes: Int, task: TaskItem?, completedAt: Date = Date()) {
         let session = FocusSession(completedAt: completedAt, durationMinutes: minutes)
         modelContext.insert(session)
@@ -157,7 +166,7 @@ final class TaskStore: ObservableObject {
     }
 
     // Database helpers
-
+    // Adds 5 sample tasks for the demo, but only if there are no tasks.
     private func loadDefaultTasks() {
         guard fetchAllTasks().isEmpty else { return }
 
@@ -178,7 +187,8 @@ final class TaskStore: ObservableObject {
 
         defaultTasks.forEach(modelContext.insert)
     }
-
+    
+    // Reads every task, oldest first. If the fetch fails it prints the error and returns an empty list w/ crashing
     private func fetchAllTasks() -> [TaskItem] {
         let descriptor = FetchDescriptor<TaskItem>(
             sortBy: [SortDescriptor(\TaskItem.createdAt)]
@@ -191,7 +201,8 @@ final class TaskStore: ObservableObject {
             return []
         }
     }
-    
+
+    // Same for focus sessions, oldest first
     private func fetchAllSessions() -> [FocusSession] {
         let descriptor = FetchDescriptor<FocusSession>(
             sortBy: [SortDescriptor(\FocusSession.completedAt)]
@@ -204,6 +215,7 @@ final class TaskStore: ObservableObject {
         }
     }
 
+    // Every change goes through here: save to disk, then re-read so the @Published arrays update
     private func saveAndRefresh() {
         do {
             try modelContext.save()
@@ -214,6 +226,7 @@ final class TaskStore: ObservableObject {
         }
     }
     
+    // Settings is a single record. Fetch at most 1. If there isn't one (first launch) or the fetch failed, create one with the default values
     private func fetchOrCreateSettings() -> AppSettings {
             var descriptor = FetchDescriptor<AppSettings>()
             descriptor.fetchLimit = 1
@@ -235,6 +248,7 @@ final class TaskStore: ObservableObject {
 // Preview helper
 
 extension TaskStore {
+    // In-memory database just for SwiftUI previews, so previews never touch real data
     static let previewContainer: ModelContainer = {
         let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
         return try! ModelContainer(for: TaskItem.self, AppSettings.self, FocusSession.self, configurations: configuration)
